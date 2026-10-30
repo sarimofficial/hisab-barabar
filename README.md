@@ -8,13 +8,19 @@ No login, no backend, no API keys. All data is saved in the browser (localStorag
 ## What it does
 
 1. Create a group and add members (names only).
-2. Add expenses in PKR: description, amount, who paid, and who shares it equally.
+2. Add expenses in USD: description, amount, who paid, and who shares it equally.
 3. Dashboard shows total spent and, per person, paid / share / balance.
 4. **Auto settlement:** a greedy largest-debtor → largest-creditor plan that
-   settles the group in at most (n − 1) payments — e.g. `Ahmed pays Ali Rs 1,150`.
-5. Start empty, or press **Load demo group** for a ready Murree Trip example
-   (Ali, Sara, Ahmed; Dinner Rs 3,000, Taxi Rs 1,500, Groceries Rs 900).
-6. **Copy settlement summary** copies a plain-text summary for WhatsApp / sharing.
+   settles the group in at most (n − 1) payments — e.g. `John pays Alex $23`.
+5. Start empty, or press **Load demo group** for a ready New York Trip example
+   (Alex, Sara, John; Dinner $60, Taxi $30, Groceries $18).
+6. **Copy settlement summary** copies a plain-text summary for sharing.
+
+## A note from the maker — Why I built this
+
+After a weekend trip to New York, my friends and I spent more time arguing about who owed what for dinner and taxis than we spent enjoying the trip. I tried a note on my phone, then a spreadsheet, then I just gave up and paid extra to avoid the awkward conversation. That felt wrong, so I built Hisab Barabar: type who paid, tick who shared it, and it tells you, in plain words, who pays whom — in as few payments as possible.
+
+— Muhammad Sarim · USA, built for Next Byte Hacks V5
 
 ## Run locally
 
@@ -35,11 +41,11 @@ node test-settlement.mjs
 
 Demo-group expectation (verified by that test):
 
-- Total Rs 5,400. Shares: Ali Rs 1,300, Sara Rs 2,050, Ahmed Rs 2,050.
-- Balances: Ali +Rs 1,700, Sara −Rs 550, Ahmed −Rs 1,150.
-- Settlement (2 payments, the minimum): Ahmed pays Ali Rs 1,150;
-  Sara pays Ali Rs 550.
+- Total $108. Shares: Alex $26, Sara $41, John $41.
+- Balances: Alex +$34, Sara −$11, John −$23.
+- Settlement (2 payments, the minimum): John pays Alex $23;
+  Sara pays Alex $11.
 
 ## Built with
 
-React + Vite, plain CSS. Money is stored in integer paisa to avoid float errors.
+React + Vite, plain CSS. Money is stored in integer cents to avoid float errors.
