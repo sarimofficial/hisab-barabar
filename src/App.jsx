@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
-import { computeBalances, computeSettlement, formatPKR, settlementSummaryText, toPaisa } from './settlement.js'
+import { computeBalances, computeSettlement, formatUSD, settlementSummaryText, toCents } from './settlement.js'
 
 const STORAGE_KEY = 'hisab-barabar-v1'
 const uid = () => Math.random().toString(36).slice(2, 9)
 
 const DEMO = {
-  groupName: 'Murree Trip',
+  groupName: 'New York Trip',
   members: [
-    { id: 'ali', name: 'Ali' },
+    { id: 'alex', name: 'Alex' },
     { id: 'sara', name: 'Sara' },
-    { id: 'ahmed', name: 'Ahmed' },
+    { id: 'john', name: 'John' },
   ],
   expenses: [
-    { id: 'e1', description: 'Dinner', amountPaisa: toPaisa(3000), paidById: 'ali', splitAmongIds: ['ali', 'sara', 'ahmed'] },
-    { id: 'e2', description: 'Taxi', amountPaisa: toPaisa(1500), paidById: 'sara', splitAmongIds: ['sara', 'ahmed'] },
-    { id: 'e3', description: 'Groceries', amountPaisa: toPaisa(900), paidById: 'ahmed', splitAmongIds: ['ali', 'sara', 'ahmed'] },
+    { id: 'e1', description: 'Dinner', amountCents: toCents(60), paidById: 'alex', splitAmongIds: ['alex', 'sara', 'john'] },
+    { id: 'e2', description: 'Taxi', amountCents: toCents(30), paidById: 'sara', splitAmongIds: ['sara', 'john'] },
+    { id: 'e3', description: 'Groceries', amountCents: toCents(18), paidById: 'john', splitAmongIds: ['alex', 'sara', 'john'] },
   ],
 }
 
@@ -44,7 +44,7 @@ export default function App() {
   const { members, expenses } = data
   const balances = useMemo(() => computeBalances(members, expenses), [members, expenses])
   const payments = useMemo(() => computeSettlement(balances), [balances])
-  const total = expenses.reduce((s, e) => s + e.amountPaisa, 0)
+  const total = expenses.reduce((s, e) => s + e.amountCents, 0)
   const memberName = (id) => members.find((m) => m.id === id)?.name || '—'
 
   useEffect(() => {
@@ -74,12 +74,12 @@ export default function App() {
   const addExpense = (e) => {
     e.preventDefault()
     const amt = Number(amount)
-    if (!desc.trim() || !amt || amt <= 0) { flash('Add a description and an amount above Rs 0.'); return }
+    if (!desc.trim() || !amt || amt <= 0) { flash('Add a description and an amount above $0.'); return }
     if (!paidBy) { flash('Add a member first, then choose who paid.'); return }
     const split = splitIds.length ? splitIds : members.map((m) => m.id)
     setData((d) => ({
       ...d,
-      expenses: [{ id: uid(), description: desc.trim(), amountPaisa: toPaisa(amt), paidById: paidBy, splitAmongIds: split }, ...d.expenses],
+      expenses: [{ id: uid(), description: desc.trim(), amountCents: toCents(amt), paidById: paidBy, splitAmongIds: split }, ...d.expenses],
     }))
     setDesc(''); setAmount(''); setSplitIds(members.map((m) => m.id))
   }
@@ -89,7 +89,7 @@ export default function App() {
   const loadDemo = () => {
     setData(JSON.parse(JSON.stringify(DEMO)))
     setGroupName(DEMO.groupName)
-    setPaidBy('ali')
+    setPaidBy('alex')
     setSplitIds(DEMO.members.map((m) => m.id))
     flash('Demo group loaded — try the settlement plan below.')
   }
@@ -137,7 +137,7 @@ export default function App() {
             <li><strong>2.</strong> Add an expense — who paid, and who shares it.</li>
             <li><strong>3.</strong> See who owes whom, in the fewest payments.</li>
           </ol>
-          <p>Or press <strong>Load demo group</strong> above to see a finished Murree Trip example instantly.</p>
+          <p>Or press <strong>Load demo group</strong> above to see a finished New York Trip example instantly.</p>
         </section>
       )}
 
@@ -147,12 +147,12 @@ export default function App() {
           <label className="field">
             <span>Group name</span>
             <div className="row">
-              <input value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Murree Trip, Flat 4B, Office Lunch" />
+              <input value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. New York Trip, Apartment 4B, Office Lunch" />
               <button className="btn" onClick={saveGroup}>Save</button>
             </div>
           </label>
           <form onSubmit={addMember} className="row">
-            <input value={newMember} onChange={(e) => setNewMember(e.target.value)} placeholder="Member name, e.g. Ali" aria-label="Member name" />
+            <input value={newMember} onChange={(e) => setNewMember(e.target.value)} placeholder="Member name, e.g. Alex" aria-label="Member name" />
             <button className="btn primary" type="submit">Add member</button>
           </form>
           {members.length > 0 ? (
@@ -171,7 +171,7 @@ export default function App() {
         </section>
 
         <section className="card">
-          <h2>Add expense (PKR)</h2>
+          <h2>Add expense (USD)</h2>
           {members.length === 0 ? (
             <p className="muted">Add at least one member first.</p>
           ) : (
@@ -179,8 +179,8 @@ export default function App() {
               <label className="field"><span>What was it?</span>
                 <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Dinner" />
               </label>
-              <label className="field"><span>Amount (Rs)</span>
-                <input type="number" min="1" step="any" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 3000" />
+              <label className="field"><span>Amount ($)</span>
+                <input type="number" min="1" step="any" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 60" />
               </label>
               <label className="field"><span>Paid by</span>
                 <select value={paidBy} onChange={(e) => setPaidBy(e.target.value)}>
@@ -207,7 +207,7 @@ export default function App() {
       <section className="card dashboard">
         <div className="dash-head">
           <h2>{data.groupName || 'Your group'} — dashboard</h2>
-          <div className="total">Total spent <strong>{formatPKR(total)}</strong></div>
+          <div className="total">Total spent <strong>{formatUSD(total)}</strong></div>
         </div>
         {members.length === 0 ? (
           <p className="muted">Balances will appear here once members and expenses are added.</p>
@@ -219,10 +219,10 @@ export default function App() {
                 {balances.map((b) => (
                   <tr key={b.id}>
                     <td>{b.name}</td>
-                    <td>{formatPKR(b.paidPaisa)}</td>
-                    <td>{formatPKR(b.sharePaisa)}</td>
-                    <td className={b.balancePaisa > 0 ? 'positive' : b.balancePaisa < 0 ? 'negative' : ''}>
-                      {b.balancePaisa > 0 ? `+${formatPKR(b.balancePaisa)} (is owed)` : b.balancePaisa < 0 ? `${formatPKR(b.balancePaisa)} (owes)` : 'Settled'}
+                    <td>{formatUSD(b.paidCents)}</td>
+                    <td>{formatUSD(b.shareCents)}</td>
+                    <td className={b.balanceCents > 0 ? 'positive' : b.balanceCents < 0 ? 'negative' : ''}>
+                      {b.balanceCents > 0 ? `+${formatUSD(b.balanceCents)} (is owed)` : b.balanceCents < 0 ? `${formatUSD(b.balanceCents)} (owes)` : 'Settled'}
                     </td>
                   </tr>
                 ))}
@@ -238,7 +238,7 @@ export default function App() {
           ) : (
             <ol className="payments">
               {payments.map((p, i) => (
-                <li key={i}><strong>{p.fromName}</strong> pays <strong>{p.toName}</strong> <strong className="amount">{formatPKR(p.amountPaisa)}</strong></li>
+                <li key={i}><strong>{p.fromName}</strong> pays <strong>{p.toName}</strong> <strong className="amount">{formatUSD(p.amountCents)}</strong></li>
               ))}
             </ol>
           )}
@@ -253,7 +253,7 @@ export default function App() {
             {expenses.map((ex) => (
               <li key={ex.id}>
                 <div><strong>{ex.description}</strong> <span className="muted">— paid by {memberName(ex.paidById)}, split among {ex.splitAmongIds.map(memberName).join(', ')}</span></div>
-                <div className="expense-right"><strong>{formatPKR(ex.amountPaisa)}</strong>
+                <div className="expense-right"><strong>{formatUSD(ex.amountCents)}</strong>
                   <button aria-label={`Delete ${ex.description}`} onClick={() => setData((d) => ({ ...d, expenses: d.expenses.filter((x) => x.id !== ex.id) }))}>Delete</button>
                 </div>
               </li>
@@ -261,6 +261,12 @@ export default function App() {
           </ul>
         </section>
       )}
+
+      <section className="card maker-note">
+        <h2>A note from the maker — Why I built this</h2>
+        <p>After a weekend trip to New York, my friends and I spent more time arguing about who owed what for dinner and taxis than we spent enjoying the trip. I tried a note on my phone, then a spreadsheet, then I just gave up and paid extra to avoid the awkward conversation. That felt wrong, so I built Hisab Barabar: type who paid, tick who shared it, and it tells you, in plain words, who pays whom — in as few payments as possible. No account, no server, your numbers stay in your browser.</p>
+        <p className="maker-sign">— Muhammad Sarim · USA, built for Next Byte Hacks V5</p>
+      </section>
 
       <footer className="muted small">
         Hisab Barabar is a brand-new project built for Next Byte Hacks V5. Your groups and expenses are saved only in this browser (localStorage) — nothing is sent to a server.

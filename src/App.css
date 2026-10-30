@@ -48,6 +48,9 @@ th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e5ece7; 
 .expenses li { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e5ece7; }
 .expense-right { display: flex; gap: 12px; align-items: center; white-space: nowrap; }
 .expense-right button { border: 0; background: none; color: #b42318; cursor: pointer; }
+.maker-note { background: #fdfcf7; border-left: 4px solid #1f7a4a; }
+.maker-note p { font-family: Georgia, 'Times New Roman', serif; font-size: 17px; line-height: 1.6; color: #2b332d; }
+.maker-sign { font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 700; color: #1f7a4a; margin-top: 12px; }
 footer { text-align: center; margin-top: 8px; }
 @media (max-width: 700px) {
   .grid { grid-template-columns: 1fr; }
